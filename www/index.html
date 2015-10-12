@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Acelerometro</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    // The watch id references the current `watchAcceleration`
+    var watchID = null;
+    var my_media = null;
+    var mediaTimer = null;
+
+    // Wait for device API libraries to load
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // device APIs are available
+    //
+    function onDeviceReady() {
+        startWatch();
+
+
+    }
+    function onSuccess() {
+            console.log("playAudio():Audio Success");
+        }
+
+        // onError Callback
+        //
+        function onError(error) {
+          //  alert('code: '    + error.code    + '\n' +
+                //  'message: ' + error.message + '\n');
+        }
+
+        // Set audio position
+        //
+        function setAudioPosition(position) {
+            document.getElementById('audio_position').innerHTML = position;
+        }
+
+
+    // Start watching the acceleration
+    //
+    function startWatch() {
+
+        // Update acceleration every 3 seconds
+        var options = { frequency: 3000 };
+
+        watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    }
+
+    // Stop watching the acceleration
+    //
+    function stopWatch() {
+        if (watchID) {
+            navigator.accelerometer.clearWatch(watchID);
+            watchID = null;
+        }
+    }
+
+     function playAudio(src) {
+            if (my_media == null) {
+                // Create Media object from src
+                my_media = new Media(src, onSuccess, onError);
+            } // else play current audio
+            // Play audio
+            my_media.play();
+
+            // Update my_media position every second
+            if (mediaTimer == null) {
+                mediaTimer = setInterval(function() {
+                    // get my_media position
+                    my_media.getCurrentPosition(
+                        // success callback
+                        function(position) {
+                            if (position > -1) {
+                                setAudioPosition((position) + " sec");
+                            }
+                        },
+                        // error callback
+                        function(e) {
+                            console.log("Error getting pos=" + e);
+                            setAudioPosition("Error: " + e);
+                        }
+                    );
+                }, 1000);
+            }
+        }
+
+        function stopAudio() {
+            if (my_media) {
+                my_media.stop();
+            }
+            clearInterval(mediaTimer);
+            mediaTimer = null;
+        }
+
+
+    // onSuccess: Get a snapshot of the current acceleration
+    //
+
+    function onSuccess(acceleration) {
+
+        var element = document.getElementById('accelerometer');
+
+
+        if(acceleration.x>1)
+
+            element.innerHTML='Auxilio!!! <br>'+playAudio("http://recetasjuly.webcindario.com/Grito%20de%20miedo,%20Terror%20%20(Efecto%20de%20Sonido)%20Scary%20Scream%20Sound%20Effect.mp3");
+
+       
+
+
+
+
+
+        else
+
+        element.innerHTML = 'Acceleration X: ' + acceleration.x + '<br />' +
+                            'Acceleration Y: ' + acceleration.y + '<br />' +
+                            'Acceleration Z: ' + acceleration.z + '<br />' +
+                            'Timestamp: '      + acceleration.timestamp + '<br />'+stopAudio();
+    }
+    function setAudioPosition(position) {
+            document.getElementById('audio_position').innerHTML = position;
+        }
+
+    // onError: Failed to get the acceleration
+    //
+    //function onError() {
+        //alert('onError!');
+    //}
+
+    </script>
+  </head>
+  <body>
+    <div id="accelerometer">Esperando acelerometro...</div>
+  </body>
+</html>
